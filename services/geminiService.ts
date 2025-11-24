@@ -1,18 +1,15 @@
-
 import { GoogleGenAI, Chat } from "@google/genai";
 import type { IncorrectAnswer } from '../types';
 
-// Initialize the AI client. We fallback to an empty string to prevent
-// the application from crashing on startup if the environment variable
-// is temporarily missing, allowing the UI to render.
-const apiKey = process.env.API_KEY || "";
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// Initialize the AI client.
+// The API key is injected from the environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const topics = ["Present Simple vs. Continuous", "Past Simple", "Prepositions of Time", "Phrasal Verbs (Common)", "Articles (a, an, the)"];
 
 export const createChatSession = (level: string): Chat => {
   return ai.chats.create({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-flash-latest',
     config: {
       systemInstruction: `You are Stinglish, a friendly and supportive English tutor. You are chatting with a student whose level is ${level}. Your tone should be professional, pedagogical, and motivating. Keep your responses tailored to their level. Do not reveal you are an AI model.`,
     },
@@ -30,7 +27,7 @@ ${incorrectAnswers.map(a => `- Question: "${a.question}", User Answer: "${a.user
 Topic to practice:`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-flash-latest",
       contents: prompt,
     });
     
