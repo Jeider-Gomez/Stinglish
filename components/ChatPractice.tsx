@@ -32,9 +32,15 @@ const ChatPractice: React.FC<ChatPracticeProps> = ({ user }) => {
   }, [messages]);
   
   useEffect(() => {
-    const session = createChatSession(user.level);
-    setChat(session);
-    setMessages([{ role: 'model', text: `Hello ${user.name}! I'm Stinglish. Let's practice your English. You can start by asking me a question or telling me about your day.` }]);
+    try {
+      const session = createChatSession(user.level);
+      setChat(session);
+      setMessages([{ role: 'model', text: `Hello ${user.name}! I'm Stinglish. Let's practice your English. You can start by asking me a question or telling me about your day.` }]);
+    } catch (error) {
+       console.error("Failed to initialize chat:", error);
+       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+       setMessages([{ role: 'model', text: `Sorry, I couldn't start our conversation. There might be an issue with the configuration.\n\nPlease ensure the API Key is set up correctly for this deployment.\n\nError: ${errorMessage}` }]);
+    }
   }, [user.name, user.level]);
 
 
@@ -118,14 +124,14 @@ const ChatPractice: React.FC<ChatPracticeProps> = ({ user }) => {
                     handleSend(e);
                 }
             }}
-            placeholder="Type your message..."
+            placeholder={chat ? "Type your message..." : "Chat is unavailable."}
             className="flex-1 w-full px-5 py-3 bg-gray-100 text-secondary border border-transparent rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder-neutral-dark"
-            disabled={isLoading}
+            disabled={isLoading || !chat}
             aria-label="Chat input"
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !input.trim() || !chat}
             className="w-12 h-12 flex-shrink-0 bg-primary text-white rounded-full hover:bg-opacity-90 disabled:bg-neutral disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-110 flex items-center justify-center shadow-lg"
             aria-label="Send message"
           >
