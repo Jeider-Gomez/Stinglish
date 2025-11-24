@@ -2,13 +2,11 @@ import { GoogleGenAI, Chat } from "@google/genai";
 import type { IncorrectAnswer } from '../types';
 
 // Function to initialize and get the AI client.
-// This prevents the app from crashing on load if the API key is missing.
 const getAIClient = () => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        throw new Error("API_KEY is not configured in environment variables.");
-    }
-    return new GoogleGenAI({ apiKey });
+    // Let the GoogleGenAI constructor handle the missing API key.
+    // It will throw a more specific error that can be caught and displayed by the UI,
+    // which is better for diagnosing environment-specific issues.
+    return new GoogleGenAI({ apiKey: process.env.API_KEY });
 }
 
 export const topics = ["Present Simple vs. Continuous", "Past Simple", "Prepositions of Time", "Phrasal Verbs (Common)", "Articles (a, an, the)"];
