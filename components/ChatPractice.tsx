@@ -54,30 +54,27 @@ const ChatPractice: React.FC<ChatPracticeProps> = ({ user }) => {
     setInput('');
     setIsLoading(true);
 
-    try {
-      const result = await chat.sendMessageStream({ message: currentInput });
-      
-      let fullResponse = '';
-      setMessages(prev => [...prev, { role: 'model', text: '' }]);
+    // Add a placeholder for the model's response to show the typing indicator
+    setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
-      for await (const chunk of result) {
-        fullResponse += chunk.text;
-        setMessages((prev) => {
-            const newMessages = [...prev];
-            newMessages[newMessages.length - 1] = { role: 'model', text: fullResponse };
-            return newMessages;
-        });
-      }
+    try {
+      const result = await chat.sendMessage({ message: currentInput });
+      const modelResponse: ChatMessage = { role: 'model', text: result.text };
+      
+      setMessages((prev) => {
+          const newMessages = [...prev];
+          // Replace the last message (the placeholder) with the actual response
+          newMessages[newMessages.length - 1] = modelResponse;
+          return newMessages;
+      });
+
     } catch (error) {
       console.error('Error sending message:', error);
+      const errorMessage: ChatMessage = { role: 'model', text: 'Sorry, I encountered an error. Please try again.' };
       setMessages((prev) => {
-        const newMessages = [...prev];
-        const lastMsg = newMessages[newMessages.length -1];
-        if (lastMsg.role === 'model' && lastMsg.text === '') {
-             newMessages[newMessages.length - 1] = { role: 'model', text: 'Sorry, I encountered an error. Please try again.' };
-             return newMessages;
-        }
-        return [...prev, { role: 'model', text: 'Sorry, I encountered an error. Please try again.' }]
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = errorMessage;
+          return newMessages;
       });
     } finally {
       setIsLoading(false);
